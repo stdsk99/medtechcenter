@@ -45,7 +45,7 @@
     foot.innerHTML = `<div class="wrap foot-row">
       <div class="foot-main"><span class="foot-name">${esc(S.name||"")}</span>
         <span class="muted" style="font-size:14px">สื่อเพื่อการศึกษา การซ่อมเครื่องจริงต้องทำตาม service manual ของผู้ผลิต โดยช่างที่ผ่านการอบรม</span></div>
-      <div class="foot-col"><a href="verify.html">ตรวจสอบเกียรติบัตร</a><a href="soon.html?p=howto">วิธีใช้งาน</a><a href="soon.html?p=privacy">นโยบายความเป็นส่วนตัว (PDPA)</a></div>
+      <div class="foot-col"><a href="verify.html">ตรวจสอบเกียรติบัตร</a><a href="howto.html"${page==="howto"?' aria-current="page"':""}>วิธีใช้งาน</a><a href="privacy.html"${page==="privacy"?' aria-current="page"':""}>นโยบายความเป็นส่วนตัว (PDPA)</a></div>
       ${rows.length?`<div class="foot-col"><b>ติดต่อ</b>${rows.join("")}</div>`:""}
     </div>`;
   }
