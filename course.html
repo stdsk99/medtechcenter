@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>รายละเอียดวิชา · ศูนย์การเรียนรู้เทคโนโลยีทางการแพทย์</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site.css">
+</head>
+<body data-page="course">
+<header class="site-head"></header>
+<main id="main" class="wrap" style="padding-top:24px;padding-bottom:24px">
+  <a class="back" href="./#devices">← เครื่องที่ฝึกได้ทั้งหมด</a>
+  <div id="course"></div>
+</main>
+<footer class="site-foot"></footer>
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/courses.js"></script>
+<script src="js/site.js"></script>
+<script>
+(function(){
+  const M = window.MTC, esc = M.esc, S = window.SITE;
+  const id = new URLSearchParams(location.search).get("c");
+  const C = (window.COURSES||[]).find(x=>x.id===id);
+  const root = document.getElementById("course");
+  if(!C){ root.innerHTML = `<div class="soon-page"><h1>ไม่พบวิชานี้</h1><a class="btn btn-primary" href="./#devices">ดูเครื่องที่ฝึกได้</a></div>`; return; }
+  document.title = C.th + " · " + S.name;
+  const appUrl = (S.apps||{})[C.id] || "#";
+
+  root.innerHTML = `
+    <section class="course-hero">
+      <div class="course-art art-${C.art}">${window.COURSE_ART[C.id]||""}</div>
+      <div class="course-head">
+        <span class="tag tag-mint">วิชาฝึกซ่อม · เรียนฟรี</span>
+        <h1>${esc(C.th)}</h1>
+        <span class="en">${esc(C.en)}</span>
+        <p>${esc(C.intro)}</p>
+        <div id="cta" class="cta-box" aria-live="polite"></div>
+      </div>
+    </section>
+    <section class="course-grid">
+      <div class="panel-card">
+        <h2>เรียนอะไรบ้าง</h2>
+        <ol class="learn-list">${C.learn.map(t=>`<li>${esc(t)}</li>`).join("")}</ol>
+      </div>
+      <div class="side-col">
+        <div class="panel-card">
+          <h2>เกณฑ์รับเกียรติบัตร</h2>
+          <ul class="crit-list">${window.COURSE_CRIT.split(" · ").map(t=>`<li>${esc(t)}</li>`).join("")}</ul>
+          <p class="muted small">เรียนตามจังหวะของตัวเอง ความคืบหน้าบันทึกให้อัตโนมัติ ทำต่อจากเครื่องไหนก็ได้</p>
+        </div>
+        <div class="panel-card">
+          <h2>เหมาะกับใคร</h2>
+          <p class="muted">นักศึกษา ช่างเครื่องมือแพทย์ บุคลากรโรงพยาบาล และผู้สนใจทั่วไป ไม่ต้องมีพื้นฐานไฟฟ้ามาก่อน</p>
+        </div>
+      </div>
+    </section>`;
+
+  const cta = document.getElementById("cta");
+  function draw(state, msg){
+    const sess = M.session();
+    if(!sess){
+      cta.innerHTML = `<a class="btn btn-primary" href="login.html?mode=reg&next=${encodeURIComponent("course.html?c="+C.id)}">สมัครสมาชิกเพื่อลงทะเบียนเรียน</a>
+        <a class="btn btn-ghost" href="login.html?next=${encodeURIComponent("course.html?c="+C.id)}">มีบัญชีแล้ว เข้าสู่ระบบ</a>`;
+      return;
+    }
+    const enrolled = (sess.enrolled||[]).includes(C.id);
+    if(enrolled){
+      cta.innerHTML = `<a class="btn btn-primary" href="${esc(appUrl)}">เข้าเรียน →</a>
+        <span class="ok-note">✓ ลงทะเบียนเรียนวิชานี้แล้ว</span>${msg?`<div class="msg ok">${esc(msg)}</div>`:""}`;
+    }else{
+      cta.innerHTML = `<button class="btn btn-primary" id="enroll" type="button"${state==="busy"?" disabled":""}>${state==="busy"?"กำลังลงทะเบียน…":"ลงทะเบียนเรียนวิชานี้"}</button>
+        <span class="muted small">ลงทะเบียนแล้วจะเห็นวิชานี้ในหน้าวิชาของฉัน</span>${msg?`<div class="msg bad">${esc(msg)}</div>`:""}`;
+      document.getElementById("enroll").onclick = async ()=>{
+        draw("busy");
+        const r = await M.enroll(C.id);
+        if(r.ok) draw("", "ลงทะเบียนเรียบร้อย กดเข้าเรียนได้เลย");
+        else { if(r.err==="badpin"||r.err==="nouser"){ M.logout(); location.href="login.html?next="+encodeURIComponent("course.html?c="+C.id); return; } draw("", M.errText(r)); }
+      };
+    }
+  }
+  draw();
+  /* ตรวจสถานะล่าสุดจากระบบ เผื่อลงทะเบียนจากเครื่องอื่น */
+  if(M.session()) M.refresh().then(r=>{ if(r.ok || r.err==="badpin" || r.err==="nouser") draw(); });
+})();
+</script>
+</body>
+</html>

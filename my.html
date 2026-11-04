@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>วิชาของฉัน · ศูนย์การเรียนรู้เทคโนโลยีทางการแพทย์</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site.css">
+</head>
+<body data-page="my">
+<header class="site-head"></header>
+<main id="main" class="wrap" style="padding-top:28px;padding-bottom:24px">
+  <div id="my"></div>
+</main>
+<footer class="site-foot"></footer>
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/courses.js"></script>
+<script src="js/site.js"></script>
+<script>
+(function(){
+  const M = window.MTC, esc = M.esc, S = window.SITE, CS = window.COURSES||[];
+  const root = document.getElementById("my");
+  if(!M.session()){ location.replace("login.html?next=my.html"); return; }
+  const thDate = iso=>{ try{ return new Date(iso).toLocaleDateString("th-TH",{year:"numeric",month:"long",day:"numeric"}); }catch(e){ return ""; } };
+
+  function render(data, loading, error){
+    const s = M.session(); if(!s) return;
+    const p = s.profile, enrolled = (data && data.enrolled) || s.enrolled || [];
+    const prog = (data && data.progress) || {}, certs = (data && data.certs) || [];
+    const mine = CS.filter(c=>enrolled.includes(c.id)), others = CS.filter(c=>!enrolled.includes(c.id));
+    root.innerHTML = `
+      <div class="my-head">
+        <div>
+          <span class="muted">สวัสดี</span>
+          <h1>${esc(p.name)}</h1>
+          <span class="muted">${p.type==="gp" ? `บุคลากร / บุคคลทั่วไป · ${esc(p.org||"-")}` : `นักศึกษา · รหัส ${esc(p.sid)}${p.sec?" · กลุ่ม "+esc(p.sec):""}`}</span>
+        </div>
+        <button class="btn btn-outline btn-sm" id="out" type="button">ออกจากระบบ</button>
+      </div>
+      ${data && data.reset ? `<div class="msg ok">ตั้ง PIN ใหม่เรียบร้อยแล้ว</div>` : ""}
+      ${error ? `<div class="msg bad" role="alert">${esc(error)}</div>` : ""}
+      <h2 class="h-sec">วิชาที่ลงทะเบียน</h2>
+      ${mine.length ? `<div class="my-grid">${mine.map(c=>card(c, prog[c.id], certs.filter(x=>x.app===c.id), loading)).join("")}</div>`
+        : `<div class="empty">ยังไม่ได้ลงทะเบียนวิชาใด เลือกวิชาด้านล่างเพื่อเริ่มเรียน</div>`}
+      ${others.length ? `<h2 class="h-sec">วิชาอื่นที่เปิดให้เรียน</h2>
+        <div class="my-grid">${others.map(c=>`<a class="mini-course" href="course.html?c=${c.id}"><span class="mini-art art-${c.art}">${window.COURSE_ART[c.id]||""}</span><span><b>${esc(c.th)}</b><small>${esc(c.en)}</small><span class="go">ดูรายละเอียดและลงทะเบียน →</span></span></a>`).join("")}</div>` : ""}`;
+    document.getElementById("out").onclick = ()=>{ M.logout(); location.href = "./"; };
+  }
+
+  function card(c, g, certs, loading){
+    const url = (S.apps||{})[c.id] || "#";
+    if(!g) g = {learn:0, exam:0, avg:0, quiz:0, order:0, pct:0, pass:false, crit:{learnCases:8, examCases:8, examAvg:70, quizPct:80, orderTasks:3}};
+    const k = g.crit;
+    const row = (ok, t, v)=>`<li class="${ok?"done":""}"><span>${ok?"✓":"○"} ${t}</span><span class="muted">${v}</span></li>`;
+    const status = loading ? `<span class="pill pill-grey">กำลังโหลด…</span>` : g.pass ? `<span class="pill pill-ok">ผ่านเกณฑ์แล้ว</span>` : g.pct ? `<span class="pill pill-run">กำลังเรียน ${g.pct}%</span>` : `<span class="pill pill-grey">ยังไม่เริ่ม</span>`;
+    return `<article class="prog-card">
+      <div class="prog-top"><span class="mini-art art-${c.art}">${window.COURSE_ART[c.id]||""}</span>
+        <div><h3>${esc(c.th)}</h3><small class="muted">${esc(c.en)}</small></div>${status}</div>
+      <div class="bar" role="progressbar" aria-label="ความคืบหน้า ${esc(c.th)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${g.pct}"><i style="width:${g.pct}%"></i></div>
+      <ul class="crit-rows">
+        ${row(g.learn>=k.learnCases, `โหมดเรียนรู้ ${k.learnCases} เคส`, `${g.learn}/${k.learnCases}`)}
+        ${row(g.exam>=k.examCases && g.avg>=k.examAvg, `โหมดสอบ ${k.examCases} เคส เฉลี่ย ≥ ${k.examAvg}`, `${g.exam}/${k.examCases}${g.exam?" · เฉลี่ย "+g.avg:""}`)}
+        ${row(g.quiz>=k.quizPct, `แบบทดสอบ ≥ ${k.quizPct}%`, g.quiz?g.quiz+"%":"ยังไม่ได้ทำ")}
+        ${row(g.order>=k.orderTasks, `ลำดับขั้นตอน ${k.orderTasks} งาน`, `${g.order}/${k.orderTasks}`)}
+      </ul>
+      ${certs.length ? `<div class="cert-row">${certs.map(x=>`<div><b>เกียรติบัตร เลขที่ ${esc(x.ref)}</b><small class="muted">ออกเมื่อ ${thDate(x.date)}</small></div>`).join("")}</div>`
+        : g.pass ? `<p class="muted small">ผ่านเกณฑ์แล้ว ดาวน์โหลดใบรับรองได้ในแอป (เมนู "ผลของฉัน") ส่วนเกียรติบัตรทางการ ผู้ดูแลระบบจะออกให้และแสดงที่นี่</p>` : ""}
+      <div class="prog-actions"><a class="btn btn-primary btn-sm" href="${esc(url)}">${g.pct?"เรียนต่อ →":"เริ่มเรียน →"}</a>
+        <a class="btn btn-ghost btn-sm" href="course.html?c=${c.id}">รายละเอียดวิชา</a></div>
+    </article>`;
+  }
+
+  render(null, true);
+  M.refresh().then(r=>{
+    if(r.ok) render(r, false);
+    else if(r.err==="badpin" || r.err==="nouser") location.replace("login.html?next=my.html");
+    else render(null, false, M.errText(r) + " · ข้อมูลที่แสดงอาจยังไม่เป็นปัจจุบัน");
+  });
+})();
+</script>
+</body>
+</html>

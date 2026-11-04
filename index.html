@@ -11,27 +11,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/site.css">
 </head>
-<body>
+<body data-page="home">
 <a class="skip" href="#main">ข้ามไปเนื้อหาหลัก</a>
 
-<header class="site-head" id="top">
-  <div class="wrap head-row">
-    <a class="brand" href="./">
-      <span class="logo"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/><path d="M8 12h2l1-2 2 4 1-2h2"/></svg></span>
-      <span class="brand-name">ศูนย์การเรียนรู้เทคโนโลยีทางการแพทย์</span>
-    </a>
-    <button class="menu-btn" type="button" aria-label="เปิดเมนู" aria-expanded="false" aria-controls="nav">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-    </button>
-    <nav class="nav" id="nav" aria-label="เมนูหลัก">
-      <a href="#devices">เครื่องที่ฝึกได้</a>
-      <a href="#example">ลองดูตัวอย่าง</a>
-      <a href="soon.html?p=verify">ตรวจสอบเกียรติบัตร</a>
-      <a class="nav-login" href="soon.html?p=login">เข้าสู่ระบบ</a>
-      <a class="btn btn-primary btn-sm" href="soon.html?p=register">สมัครเรียนฟรี</a>
-    </nav>
-  </div>
-</header>
+<header class="site-head" id="top"></header>
 
 <main id="main">
   <!-- hero -->
@@ -82,7 +65,7 @@
       <p>ทุกเครื่องมี 6 บทเรียนเหมือนกัน เริ่มจากดูข้างในเครื่อง ไปจนถึงแบบทดสอบท้ายบท</p>
     </div>
     <div class="devices">
-      <a class="device" href="soon.html?p=course-pump">
+      <a class="device" href="course.html?c=pump">
         <div class="device-art art-sky">
           <span class="badge">เปิดฝึกแล้ว</span>
           <svg viewBox="0 0 160 130" aria-hidden="true">
@@ -102,7 +85,7 @@
           <span class="go">ดูรายละเอียดวิชา →</span>
         </div>
       </a>
-      <a class="device" href="soon.html?p=course-incubator">
+      <a class="device" href="course.html?c=incubator">
         <div class="device-art art-peach">
           <span class="badge">เปิดฝึกแล้ว</span>
           <svg viewBox="0 0 180 130" aria-hidden="true">
@@ -167,31 +150,17 @@
         <div class="who"><span>นักศึกษา</span><span>ช่างเครื่องมือแพทย์</span><span>บุคลากรโรงพยาบาล</span><span>ผู้สนใจทั่วไป</span></div>
       </div>
       <div class="join-actions">
-        <a class="btn btn-sun" href="soon.html?p=register">สมัครเรียนฟรี</a>
-        <a class="link" href="soon.html?p=login">มีบัญชีแล้ว เข้าสู่ระบบ</a>
+        <a class="btn btn-sun" href="login.html?mode=reg">สมัครเรียนฟรี</a>
+        <a class="link" href="login.html">มีบัญชีแล้ว เข้าสู่ระบบ</a>
       </div>
     </div>
   </section>
 </main>
 
-<footer class="site-foot">
-  <div class="wrap foot-row">
-    <div class="foot-main">
-      <span class="foot-name">ศูนย์การเรียนรู้เทคโนโลยีทางการแพทย์</span>
-      <span class="muted" style="font-size:14px">สื่อเพื่อการศึกษา การซ่อมเครื่องจริงต้องทำตาม service manual ของผู้ผลิต โดยช่างที่ผ่านการอบรม</span>
-    </div>
-    <div class="foot-col">
-      <a href="soon.html?p=verify">ตรวจสอบเกียรติบัตร</a>
-      <a href="soon.html?p=howto">วิธีใช้งาน</a>
-      <a href="soon.html?p=privacy">นโยบายความเป็นส่วนตัว (PDPA)</a>
-    </div>
-    <div class="foot-col" id="contact" hidden>
-      <b>ติดต่อ</b>
-    </div>
-  </div>
-</footer>
+<footer class="site-foot"></footer>
 
 <script src="js/config.js"></script>
+<script src="js/api.js"></script>
 <script src="js/site.js"></script>
 </body>
 </html>

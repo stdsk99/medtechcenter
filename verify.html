@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ตรวจสอบเกียรติบัตร · ศูนย์การเรียนรู้เทคโนโลยีทางการแพทย์</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site.css">
+</head>
+<body data-page="verify">
+<header class="site-head"></header>
+<main id="main" class="wrap verify-wrap">
+  <h1>ตรวจสอบเกียรติบัตร</h1>
+  <p class="muted lead">กรอกเลขที่ที่พิมพ์อยู่มุมล่างของเกียรติบัตร เพื่อยืนยันว่าศูนย์ออกให้จริง</p>
+  <form class="panel-card" id="vf" novalidate>
+    <label class="field" for="ref">เลขที่เกียรติบัตร</label>
+    <div class="inline-form">
+      <input id="ref" placeholder="เช่น IIT-2569-001" autocomplete="off" autocapitalize="characters" required>
+      <button class="btn btn-primary" type="submit" id="vgo">ตรวจสอบ</button>
+    </div>
+    <p class="muted small">IPT = Infusion Pump · IIT = ตู้อบทารก</p>
+  </form>
+  <div id="res" aria-live="polite"></div>
+</main>
+<footer class="site-foot"></footer>
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/site.js"></script>
+<script>
+(function(){
+  const M = window.MTC, esc = M.esc;
+  const f = document.getElementById("vf"), inp = document.getElementById("ref"), res = document.getElementById("res"), go = document.getElementById("vgo");
+  const thDate = iso=>{ try{ return new Date(iso).toLocaleDateString("th-TH",{year:"numeric",month:"long",day:"numeric"}); }catch(e){ return ""; } };
+  async function check(){
+    const ref = inp.value.trim().toUpperCase().replace(/\s+/g,"");
+    if(!/^[A-Z]{2,5}-\d{4}-\d{1,5}$/.test(ref)){ res.innerHTML = `<div class="msg bad" role="alert">รูปแบบเลขที่ไม่ถูกต้อง ตัวอย่างที่ถูก: IIT-2569-001</div>`; return; }
+    go.disabled = true; go.textContent = "กำลังตรวจสอบ…"; res.innerHTML = "";
+    const r = await M.verify(ref);
+    go.disabled = false; go.textContent = "ตรวจสอบ";
+    if(r.ok){
+      res.innerHTML = `<div class="verified" role="status">
+        <div class="v-head"><span class="v-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg></span>เกียรติบัตรนี้ออกโดยศูนย์จริง</div>
+        <dl><dt>เลขที่</dt><dd>${esc(r.ref)}</dd><dt>ผู้ได้รับ</dt><dd>${esc(r.name)}</dd><dt>การฝึก</dt><dd>${esc(r.title)}</dd><dt>วันที่ออก</dt><dd>${thDate(r.date)}</dd></dl></div>`;
+    }else if(r.err==="notfound"){
+      res.innerHTML = `<div class="msg bad" role="alert">ไม่พบเลขที่ ${esc(ref)} ในระบบ กรุณาตรวจสอบเลขที่อีกครั้ง ถ้ายังไม่พบ เกียรติบัตรนี้อาจไม่ได้ออกโดยศูนย์</div>`;
+    }else res.innerHTML = `<div class="msg bad" role="alert">${esc(M.errText(r))}</div>`;
+  }
+  f.onsubmit = e=>{ e.preventDefault(); check(); };
+  const q = new URLSearchParams(location.search).get("ref");
+  if(q){ inp.value = q; check(); }
+})();
+</script>
+</body>
+</html>

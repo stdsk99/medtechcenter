@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>เข้าสู่ระบบ · ศูนย์การเรียนรู้เทคโนโลยีทางการแพทย์</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site.css">
+</head>
+<body data-page="login">
+<header class="site-head"></header>
+<main id="main" class="wrap auth-wrap">
+  <div class="auth-card" id="auth"></div>
+</main>
+<footer class="site-foot"></footer>
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/site.js"></script>
+<script>
+(function(){
+  const M = window.MTC, esc = M.esc, S = window.SITE;
+  const q = new URLSearchParams(location.search);
+  let mode = q.get("mode")==="reg" ? "reg" : "login", type = "st";
+  const box = document.getElementById("auth");
+
+  if(M.session()){ location.replace(M.nextUrl()); return; }
+
+  function render(){
+    const st = type==="st", reg = mode==="reg";
+    document.title = (reg?"สมัครสมาชิก":"เข้าสู่ระบบ") + " · " + S.name;
+    box.innerHTML = `
+      <h1>${reg?"สมัครเรียนฟรี":"เข้าสู่ระบบ"}</h1>
+      <p class="muted">${reg?"สมัครครั้งเดียว ใช้ได้ทุกวิชาและทุกเครื่อง":"ยินดีต้อนรับกลับมา"}</p>
+      <div class="seg" role="tablist" aria-label="ประเภทผู้เรียน">
+        <button type="button" role="tab" data-t="st" aria-selected="${st}" class="${st?"on":""}">นักศึกษา</button>
+        <button type="button" role="tab" data-t="gp" aria-selected="${!st}" class="${st?"":"on"}">บุคลากร / บุคคลทั่วไป</button>
+      </div>
+      <form id="f" novalidate>
+        ${reg?`<label class="field">ชื่อ-สกุล (พร้อมคำนำหน้า)<input id="n" autocomplete="name" required></label>`:""}
+        <label class="field">${st?"รหัสนักศึกษา":"อีเมล"}<input id="u" ${st?'inputmode="numeric" autocomplete="username"':'type="email" autocomplete="email"'} required></label>
+        ${reg?(st?`<label class="field">กลุ่มเรียน (ถ้ามี)<input id="g"></label>`
+          :`<label class="field">หน่วยงาน / สังกัด<input id="o" placeholder="เช่น งานเครื่องมือแพทย์ โรงพยาบาล…" required></label>
+            <label class="field">ตำแหน่ง (ถ้ามี)<input id="r" placeholder="เช่น ช่างเทคนิค พยาบาล"></label>`):""}
+        <label class="field">PIN (ตัวเลข 4–6 หลัก)<input id="p" type="password" inputmode="numeric" maxlength="6" autocomplete="${reg?"new-password":"current-password"}" required></label>
+        ${reg?`<label class="field">ยืนยัน PIN<input id="p2" type="password" inputmode="numeric" maxlength="6" autocomplete="new-password" required></label>
+          <label class="consent"><input type="checkbox" id="c"><span>${esc(S.pdpa||"")}</span></label>
+          <p class="muted small">PIN ใช้กันไม่ให้ผู้อื่นเข้าบัญชีของคุณ ไม่ควรใช้ซ้ำกับรหัสผ่านของบัญชีสำคัญอื่น</p>`:""}
+        <div class="msg bad" id="e" role="alert" hidden></div>
+        <button class="btn btn-primary wide" type="submit" id="go">${reg?"สมัครและเริ่มเรียน":"เข้าสู่ระบบ"}</button>
+      </form>
+      <p class="muted small center">${reg?`มีบัญชีแล้ว? <a href="#" data-sw="login">เข้าสู่ระบบ</a>`:`ยังไม่มีบัญชี? <a href="#" data-sw="reg">สมัครเรียนฟรี</a> · ลืม PIN ติดต่อผู้ดูแลระบบเพื่อตั้งใหม่`}</p>
+      <p class="muted small center">เคยสมัครในแอป Infusion Pump หรือตู้อบทารกแล้ว ใช้บัญชีและ PIN เดิมได้เลย</p>`;
+    box.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{ type=b.dataset.t; render(); });
+    box.querySelectorAll("[data-sw]").forEach(a=>a.onclick=e=>{ e.preventDefault(); mode=a.dataset.sw; render(); });
+    box.querySelector("#f").onsubmit = e=>{ e.preventDefault(); submit(); };
+    const f = box.querySelector(reg?"#n":"#u"); if(f) f.focus();
+  }
+
+  async function submit(){
+    const v = id=>{ const x=box.querySelector(id); return x?x.value.trim():""; };
+    const err = m=>{ const x=box.querySelector("#e"); x.textContent=m; x.hidden=false; };
+    const uid = M.norm(type, v("#u")), pin = v("#p"), reg = mode==="reg";
+    if(!uid) return err(type==="st"?"กรุณากรอกรหัสนักศึกษา":"กรุณากรอกอีเมล");
+    if(type==="gp" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(uid)) return err("รูปแบบอีเมลไม่ถูกต้อง");
+    if(!/^\d{4,6}$/.test(pin)) return err("PIN ต้องเป็นตัวเลข 4–6 หลัก");
+    if(reg){
+      if(!v("#n")) return err("กรุณากรอกชื่อ-สกุล");
+      if(type==="gp" && !v("#o")) return err("กรุณากรอกหน่วยงาน");
+      if(pin!==v("#p2")) return err("PIN ทั้งสองช่องไม่ตรงกัน");
+      if(!box.querySelector("#c").checked) return err("กรุณาอ่านและกดยินยอมการเก็บข้อมูลก่อนสมัคร");
+    }
+    if(!(window.crypto && crypto.subtle)) return err("เบราว์เซอร์นี้ไม่รองรับการเข้ารหัส กรุณาเปิดผ่าน https หรือใช้เบราว์เซอร์รุ่นใหม่");
+    const go = box.querySelector("#go"); go.disabled=true; go.textContent="กำลังเชื่อมต่อ…";
+    const r = reg
+      ? await M.register(type==="st" ? {type:"st", sid:uid, name:v("#n"), sec:v("#g")} : {type:"gp", sid:uid, name:v("#n"), org:v("#o"), role:v("#r"), sec:""}, pin)
+      : await M.login(type, uid, pin);
+    if(!r.ok){ go.disabled=false; go.textContent=reg?"สมัครและเริ่มเรียน":"เข้าสู่ระบบ"; return err(M.errText(r)); }
+    location.replace(M.nextUrl());
+  }
+  render();
+})();
+</script>
+</body>
+</html>
