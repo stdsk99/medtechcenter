@@ -49,7 +49,7 @@
       <div class="side-col">
         <div class="panel-card">
           <h2>เกณฑ์รับเกียรติบัตร</h2>
-          <ul class="crit-list">${window.COURSE_CRIT.split(" · ").map(t=>`<li>${esc(t)}</li>`).join("")}</ul>
+          <ul class="crit-list">${(C.crit||[]).map(t=>`<li>${esc(t)}</li>`).join("")}</ul>
           <p class="muted small">เรียนตามจังหวะของตัวเอง ความคืบหน้าบันทึกให้อัตโนมัติ ทำต่อจากเครื่องไหนก็ได้</p>
         </div>
         <div class="panel-card">
