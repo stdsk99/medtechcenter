@@ -16,7 +16,7 @@ window.SITE = {
     incubator: "/infant-incubator-trainer/"
   },
   contact: {
-    email: "",
+    email: "theptharo2019@gmail.com",
     line: "",
     phone: ""
   },
