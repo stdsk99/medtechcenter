@@ -14,6 +14,7 @@
 <header class="site-head"></header>
 <main id="main" class="wrap" style="padding-top:28px;padding-bottom:24px">
   <div id="my"></div>
+  <div id="acct"></div>
 </main>
 <footer class="site-foot"></footer>
 <script src="js/config.js"></script>
@@ -41,7 +42,6 @@
         </div>
         <button class="btn btn-outline btn-sm" id="out" type="button">ออกจากระบบ</button>
       </div>
-      ${data && data.reset ? `<div class="msg ok">ตั้ง PIN ใหม่เรียบร้อยแล้ว</div>` : ""}
       ${error ? `<div class="msg bad" role="alert">${esc(error)}</div>` : ""}
       <h2 class="h-sec">วิชาที่ลงทะเบียน</h2>
       ${mine.length ? `<div class="my-grid">${mine.map(c=>card(c, prog[c.id], certs.filter(x=>x.app===c.id), loading)).join("")}</div>`
@@ -75,10 +75,41 @@
     </article>`;
   }
 
+  /* บัญชีของฉัน: เปลี่ยนรหัสผ่าน */
+  function account(){
+    const a = document.getElementById("acct");
+    a.innerHTML = `<h2 class="h-sec">บัญชีของฉัน</h2>
+      <details class="acct-box"><summary>เปลี่ยนรหัสผ่าน</summary>
+        <form id="cp" novalidate>
+          ${M.pwField("cp-o", "รหัสผ่านปัจจุบัน", "current-password", false)}
+          ${M.pwField("cp-n", "รหัสผ่านใหม่", "new-password", true)}
+          ${M.pwField("cp-n2", "ยืนยันรหัสผ่านใหม่", "new-password", false)}
+          <p class="muted small">เมื่อเปลี่ยนแล้ว เครื่องอื่นที่เคยเข้าสู่ระบบไว้จะต้องเข้าสู่ระบบใหม่</p>
+          <div class="msg" id="cp-m" role="status" hidden></div>
+          <button class="btn btn-primary" type="submit" id="cp-go">บันทึกรหัสผ่านใหม่</button>
+        </form>
+      </details>`;
+    M.bindPw(a);
+    a.querySelector("#cp").onsubmit = async e=>{
+      e.preventDefault();
+      const m = a.querySelector("#cp-m"), say = (t, ok)=>{ m.textContent=t; m.className="msg "+(ok?"ok":"bad"); m.hidden=false; };
+      const old = a.querySelector("#cp-o").value, pw = a.querySelector("#cp-n").value;
+      if(!old) return say("กรุณากรอกรหัสผ่านปัจจุบัน");
+      const bad = M.pwProblem(pw, a.querySelector("#cp-n2").value); if(bad) return say(bad);
+      const go = a.querySelector("#cp-go"); go.disabled=true; go.textContent="กำลังบันทึก…";
+      const r = await M.changePassword(old, pw);
+      go.disabled=false; go.textContent="บันทึกรหัสผ่านใหม่";
+      if(!r.ok){ if(M.isAuthErr(r)){ M.logout(); location.replace("login.html?next=my.html"); return; } return say(M.errText(r)); }
+      a.querySelectorAll("input").forEach(i=>i.value=""); a.querySelectorAll(".pw-rules li").forEach(li=>li.classList.remove("ok"));
+      say("เปลี่ยนรหัสผ่านเรียบร้อยแล้ว", true);
+    };
+  }
+
   render(null, true);
+  account();
   M.refresh().then(r=>{
     if(r.ok) render(r, false);
-    else if(r.err==="badpin" || r.err==="nouser") location.replace("login.html?next=my.html");
+    else if(M.isAuthErr(r)) location.replace("login.html?next=my.html");
     else render(null, false, M.errText(r) + " · ข้อมูลที่แสดงอาจยังไม่เป็นปัจจุบัน");
   });
 })();

@@ -258,3 +258,17 @@ img,svg{max-width:100%}
 .faq details p{margin:0 0 14px;color:var(--muted)}
 .consent a{color:var(--accent)}
 @media (max-width:600px){ .howto-steps > li{flex-direction:column;gap:10px;padding:18px} .tbl{font-size:14px} }
+
+/* ===== ช่องรหัสผ่าน ===== */
+.pw-wrap{position:relative;display:flex}
+.pw-wrap input{flex:1;padding-right:76px;width:100%}
+.pw-eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);min-height:36px;padding:0 12px;border:0;border-radius:10px;background:var(--mint);color:#0A4F46;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.pw-eye:focus-visible{outline:3px solid var(--accent)}
+.pw-rules{list-style:none;margin:-4px 0 4px;padding:0;display:flex;flex-wrap:wrap;gap:6px 14px;font-size:14px;color:var(--muted)}
+.pw-rules li::before{content:"○ ";}
+.pw-rules li.ok{color:#0A6B5E}
+.pw-rules li.ok::before{content:"✓ ";font-weight:700}
+.acct-box{background:#fff;border-radius:18px;padding:4px 20px;border:1.5px solid var(--line);max-width:560px}
+.acct-box summary{cursor:pointer;font-weight:600;padding:13px 0;list-style-position:inside}
+.acct-box form{display:flex;flex-direction:column;gap:14px;padding:4px 0 20px}
+.acct-box .btn{align-self:flex-start}

@@ -23,12 +23,13 @@
 (function(){
   const M = window.MTC, esc = M.esc, S = window.SITE;
   const q = new URLSearchParams(location.search);
-  let mode = q.get("mode")==="reg" ? "reg" : "login", type = "st";
+  let mode = q.get("mode")==="reg" ? "reg" : "login", type = "st", pending = null;   // pending = {sid, old, legacy} ตอนต้องตั้งรหัสใหม่
   const box = document.getElementById("auth");
 
   if(M.session()){ location.replace(M.nextUrl()); return; }
 
   function render(){
+    if(mode==="change") return renderChange();
     const st = type==="st", reg = mode==="reg";
     document.title = (reg?"สมัครสมาชิก":"เข้าสู่ระบบ") + " · " + S.name;
     box.innerHTML = `
@@ -40,43 +41,73 @@
       </div>
       <form id="f" novalidate>
         ${reg?`<label class="field">ชื่อ-สกุล (พร้อมคำนำหน้า)<input id="n" autocomplete="name" required></label>`:""}
-        <label class="field">${st?"รหัสนักศึกษา":"อีเมล"}<input id="u" ${st?'inputmode="numeric" autocomplete="username"':'type="email" autocomplete="email"'} required></label>
+        <label class="field">${st?"รหัสนักศึกษา":"อีเมล"}<input id="u" ${st?'inputmode="numeric" autocomplete="username"':'type="email" autocomplete="username"'} required></label>
         ${reg?(st?`<label class="field">กลุ่มเรียน (ถ้ามี)<input id="g"></label>`
           :`<label class="field">หน่วยงาน / สังกัด<input id="o" placeholder="เช่น งานเครื่องมือแพทย์ โรงพยาบาล…" required></label>
             <label class="field">ตำแหน่ง (ถ้ามี)<input id="r" placeholder="เช่น ช่างเทคนิค พยาบาล"></label>`):""}
-        <label class="field">PIN (ตัวเลข 4–6 หลัก)<input id="p" type="password" inputmode="numeric" maxlength="6" autocomplete="${reg?"new-password":"current-password"}" required></label>
-        ${reg?`<label class="field">ยืนยัน PIN<input id="p2" type="password" inputmode="numeric" maxlength="6" autocomplete="new-password" required></label>
+        ${M.pwField("p", "รหัสผ่าน", reg?"new-password":"current-password", reg)}
+        ${reg?`${M.pwField("p2", "ยืนยันรหัสผ่าน", "new-password", false)}
           <label class="consent"><input type="checkbox" id="c"><span>${esc(S.pdpa||"")} <a href="privacy.html" target="_blank" rel="noopener">อ่านนโยบายความเป็นส่วนตัว</a></span></label>
-          <p class="muted small">PIN ใช้กันไม่ให้ผู้อื่นเข้าบัญชีของคุณ ไม่ควรใช้ซ้ำกับรหัสผ่านของบัญชีสำคัญอื่น</p>`:""}
+          <p class="muted small">ไม่ควรใช้รหัสผ่านซ้ำกับบัญชีสำคัญอื่น เช่น อีเมลหรือธนาคาร</p>`:""}
         <div class="msg bad" id="e" role="alert" hidden></div>
         <button class="btn btn-primary wide" type="submit" id="go">${reg?"สมัครและเริ่มเรียน":"เข้าสู่ระบบ"}</button>
       </form>
-      <p class="muted small center">${reg?`มีบัญชีแล้ว? <a href="#" data-sw="login">เข้าสู่ระบบ</a>`:`ยังไม่มีบัญชี? <a href="#" data-sw="reg">สมัครเรียนฟรี</a> · ลืม PIN ติดต่อผู้ดูแลระบบเพื่อตั้งใหม่`}</p>
-      <p class="muted small center">เคยสมัครในแอป Infusion Pump หรือตู้อบทารกแล้ว ใช้บัญชีและ PIN เดิมได้เลย</p>`;
+      <p class="muted small center">${reg?`มีบัญชีแล้ว? <a href="#" data-sw="login">เข้าสู่ระบบ</a>`:`ยังไม่มีบัญชี? <a href="#" data-sw="reg">สมัครเรียนฟรี</a> · ลืมรหัสผ่าน ติดต่อผู้ดูแลระบบ${S.contact&&S.contact.email?` (${esc(S.contact.email)})`:""}`}</p>
+      ${reg?"":`<p class="muted small center">ผู้เรียนเดิมที่เคยใช้ PIN ให้ใส่ PIN เดิมในช่องรหัสผ่าน แล้วระบบจะให้ตั้งรหัสผ่านใหม่</p>`}`;
     box.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{ type=b.dataset.t; render(); });
     box.querySelectorAll("[data-sw]").forEach(a=>a.onclick=e=>{ e.preventDefault(); mode=a.dataset.sw; render(); });
     box.querySelector("#f").onsubmit = e=>{ e.preventDefault(); submit(); };
+    M.bindPw(box);
     const f = box.querySelector(reg?"#n":"#u"); if(f) f.focus();
+  }
+
+  /* บังคับตั้งรหัสผ่านใหม่: ผู้เรียนเดิมที่ใช้ PIN หรือได้รหัสชั่วคราวจากผู้ดูแล */
+  function renderChange(){
+    document.title = "ตั้งรหัสผ่านใหม่ · " + S.name;
+    box.innerHTML = `
+      <h1>ตั้งรหัสผ่านใหม่</h1>
+      <p class="muted">${pending.legacy?"ระบบเปลี่ยนจาก PIN เป็นรหัสผ่านเพื่อความปลอดภัย กรุณาตั้งรหัสผ่านใหม่ครั้งเดียว คะแนนและวิชาเดิมอยู่ครบ":"กรุณาตั้งรหัสผ่านใหม่แทนรหัสชั่วคราวที่ได้รับจากผู้ดูแลระบบ"}</p>
+      <form id="f" novalidate>
+        <input type="text" autocomplete="username" value="${esc(pending.sid)}" hidden>
+        ${M.pwField("p", "รหัสผ่านใหม่", "new-password", true)}
+        ${M.pwField("p2", "ยืนยันรหัสผ่านใหม่", "new-password", false)}
+        <div class="msg bad" id="e" role="alert" hidden></div>
+        <button class="btn btn-primary wide" type="submit" id="go">บันทึกรหัสผ่านและเข้าสู่ระบบ</button>
+      </form>
+      <p class="muted small center"><a href="#" data-sw="login">ยกเลิก</a></p>`;
+    box.querySelector("[data-sw]").onclick = e=>{ e.preventDefault(); pending=null; mode="login"; render(); };
+    box.querySelector("#f").onsubmit = async e=>{
+      e.preventDefault();
+      const err = m=>{ const x=box.querySelector("#e"); x.textContent=m; x.hidden=false; };
+      const pw = box.querySelector("#p").value, bad = M.pwProblem(pw, box.querySelector("#p2").value);
+      if(bad) return err(bad);
+      const go = box.querySelector("#go"); go.disabled=true; go.textContent="กำลังบันทึก…";
+      const r = await M.changeWithOld(pending.sid, pending.old, pw);
+      if(!r.ok){ go.disabled=false; go.textContent="บันทึกรหัสผ่านและเข้าสู่ระบบ"; return err(M.errText(r)); }
+      location.replace(M.nextUrl());
+    };
+    M.bindPw(box);
+    box.querySelector("#p").focus();
   }
 
   async function submit(){
     const v = id=>{ const x=box.querySelector(id); return x?x.value.trim():""; };
     const err = m=>{ const x=box.querySelector("#e"); x.textContent=m; x.hidden=false; };
-    const uid = M.norm(type, v("#u")), pin = v("#p"), reg = mode==="reg";
+    const uid = M.norm(type, v("#u")), pw = box.querySelector("#p").value, reg = mode==="reg";
     if(!uid) return err(type==="st"?"กรุณากรอกรหัสนักศึกษา":"กรุณากรอกอีเมล");
     if(type==="gp" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(uid)) return err("รูปแบบอีเมลไม่ถูกต้อง");
-    if(!/^\d{4,6}$/.test(pin)) return err("PIN ต้องเป็นตัวเลข 4–6 หลัก");
+    if(!pw) return err("กรุณากรอกรหัสผ่าน");
     if(reg){
       if(!v("#n")) return err("กรุณากรอกชื่อ-สกุล");
       if(type==="gp" && !v("#o")) return err("กรุณากรอกหน่วยงาน");
-      if(pin!==v("#p2")) return err("PIN ทั้งสองช่องไม่ตรงกัน");
+      const bad = M.pwProblem(pw, box.querySelector("#p2").value); if(bad) return err(bad);
       if(!box.querySelector("#c").checked) return err("กรุณาอ่านและกดยินยอมการเก็บข้อมูลก่อนสมัคร");
     }
-    if(!(window.crypto && crypto.subtle)) return err("เบราว์เซอร์นี้ไม่รองรับการเข้ารหัส กรุณาเปิดผ่าน https หรือใช้เบราว์เซอร์รุ่นใหม่");
     const go = box.querySelector("#go"); go.disabled=true; go.textContent="กำลังเชื่อมต่อ…";
     const r = reg
-      ? await M.register(type==="st" ? {type:"st", sid:uid, name:v("#n"), sec:v("#g")} : {type:"gp", sid:uid, name:v("#n"), org:v("#o"), role:v("#r"), sec:""}, pin)
-      : await M.login(type, uid, pin);
+      ? await M.register(type==="st" ? {type:"st", sid:uid, name:v("#n"), sec:v("#g")} : {type:"gp", sid:uid, name:v("#n"), org:v("#o"), role:v("#r"), sec:""}, pw)
+      : await M.login(type, uid, pw);
+    if(r.err==="mustchange"){ pending={sid:uid, old:pw, legacy:!!r.legacy}; mode="change"; return render(); }
     if(!r.ok){ go.disabled=false; go.textContent=reg?"สมัครและเริ่มเรียน":"เข้าสู่ระบบ"; return err(M.errText(r)); }
     location.replace(M.nextUrl());
   }

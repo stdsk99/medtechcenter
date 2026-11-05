@@ -78,13 +78,13 @@
         draw("busy");
         const r = await M.enroll(C.id);
         if(r.ok) draw("", "ลงทะเบียนเรียบร้อย กดเข้าเรียนได้เลย");
-        else { if(r.err==="badpin"||r.err==="nouser"){ M.logout(); location.href="login.html?next="+encodeURIComponent("course.html?c="+C.id); return; } draw("", M.errText(r)); }
+        else { if(M.isAuthErr(r)){ M.logout(); location.href="login.html?next="+encodeURIComponent("course.html?c="+C.id); return; } draw("", M.errText(r)); }
       };
     }
   }
   draw();
   /* ตรวจสถานะล่าสุดจากระบบ เผื่อลงทะเบียนจากเครื่องอื่น */
-  if(M.session()) M.refresh().then(r=>{ if(r.ok || r.err==="badpin" || r.err==="nouser") draw(); });
+  if(M.session()) M.refresh().then(r=>{ if(r.ok || M.isAuthErr(r)) draw(); });
 })();
 </script>
 </body>
