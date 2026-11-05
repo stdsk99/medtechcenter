@@ -53,8 +53,10 @@
 
   function card(c, g, certs, loading){
     const url = (S.apps||{})[c.id] || "#";
-    if(!g) g = {learn:0, exam:0, avg:0, quiz:0, order:0, clin:0, pct:0, pass:false, crit:Object.assign({learnCases:8, examCases:8, examAvg:70, quizPct:80, orderTasks:3}, c.id==="pump"?{clinSimPct:80}:{})};
-    const k = g.crit;
+    if(!g) g = {learn:0, exam:0, avg:0, quiz:0, order:0, clin:0, pct:0, pass:false, crit:{learnCases:8, examCases:8, examAvg:70, quizPct:80, orderTasks:3}};
+    /* เกณฑ์ข้อ "ตั้งค่า/การใช้งาน" ยึดตาม courses.js ด้วย เผื่อหลังบ้านยังไม่ได้อัปเดตเกณฑ์ */
+    const k = Object.assign({}, g.crit, c.clin && !g.crit.clinSimPct ? {clinSimPct:c.clin.pct} : {});
+    if(k.clinSimPct && (g.clin||0) < k.clinSimPct && g.pass) g = Object.assign({}, g, {pass:false, pct:Math.min(g.pct, 95)});
     const row = (ok, t, v)=>`<li class="${ok?"done":""}"><span>${ok?"✓":"○"} ${t}</span><span class="muted">${v}</span></li>`;
     const status = loading ? `<span class="pill pill-grey">กำลังโหลด…</span>` : g.pass ? `<span class="pill pill-ok">ผ่านเกณฑ์แล้ว</span>` : g.pct ? `<span class="pill pill-run">กำลังเรียน ${g.pct}%</span>` : `<span class="pill pill-grey">ยังไม่เริ่ม</span>`;
     return `<article class="prog-card">
@@ -66,7 +68,7 @@
         ${row(g.exam>=k.examCases && g.avg>=k.examAvg, `โหมดสอบ ${k.examCases} เคส เฉลี่ย ≥ ${k.examAvg}`, `${g.exam}/${k.examCases}${g.exam?" · เฉลี่ย "+g.avg:""}`)}
         ${row(g.quiz>=k.quizPct, `แบบทดสอบ ≥ ${k.quizPct}%`, g.quiz?g.quiz+"%":"ยังไม่ได้ทำ")}
         ${row(g.order>=k.orderTasks, `ลำดับขั้นตอน ${k.orderTasks} งาน`, `${g.order}/${k.orderTasks}`)}
-        ${k.clinSimPct ? row((g.clin||0)>=k.clinSimPct, `เครื่องจำลองตั้งค่าทางคลินิก ≥ ${k.clinSimPct}%`, g.clin?g.clin+"%":"ยังไม่ได้ทำ") : ""}
+        ${k.clinSimPct ? row((g.clin||0)>=k.clinSimPct, `${esc((c.clin&&c.clin.label)||"ตั้งค่าทางคลินิก")} ≥ ${k.clinSimPct}%`, g.clin?g.clin+"%":"ยังไม่ได้ทำ") : ""}
       </ul>
       ${certs.length ? `<div class="cert-row">${certs.map(x=>`<div><b>เกียรติบัตร เลขที่ ${esc(x.ref)}</b><small class="muted">ออกเมื่อ ${thDate(x.date)}</small></div>`).join("")}</div>`
         : g.pass ? `<p class="muted small">ผ่านเกณฑ์แล้ว ดาวน์โหลดใบรับรองได้ในแอป (เมนู "ผลของฉัน") ส่วนเกียรติบัตรทางการ ผู้ดูแลระบบจะออกให้และแสดงที่นี่</p>` : ""}
