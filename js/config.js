@@ -13,7 +13,8 @@ window.SITE = {
   token: "pump-2569",
   apps: {
     pump: "/infusion-pump-trainer/",
-    incubator: "/infant-incubator-trainer/"
+    incubator: "/infant-incubator-trainer/",
+    "incubator-clin": "/infant-incubator-trainer/clinical/"
   },
   contact: {
     email: "theptharo2019@gmail.com",

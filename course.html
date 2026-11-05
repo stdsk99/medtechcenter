@@ -34,7 +34,7 @@
     <section class="course-hero">
       <div class="course-art art-${C.art}">${window.COURSE_ART[C.id]||""}</div>
       <div class="course-head">
-        <span class="tag tag-mint">วิชาฝึกซ่อม · เรียนฟรี</span>
+        <span class="tag tag-mint">${esc(C.tag||"วิชาฝึกซ่อม")} · เรียนฟรี</span>
         <h1>${esc(C.th)}</h1>
         <span class="en">${esc(C.en)}</span>
         <p>${esc(C.intro)}</p>

@@ -272,3 +272,4 @@ img,svg{max-width:100%}
 .acct-box summary{cursor:pointer;font-weight:600;padding:13px 0;list-style-position:inside}
 .acct-box form{display:flex;flex-direction:column;gap:14px;padding:4px 0 20px}
 .acct-box .btn{align-self:flex-start}
+.device-art .badge-clin{background:#B5482B}

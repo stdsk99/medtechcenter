@@ -6,7 +6,7 @@
   const S = window.SITE || {};
   const K = "mtc-session";
   /* คีย์ของแอปฝึกซ่อม ลบพร้อมกันตอนออกจากระบบ */
-  const APP_KEYS = ["ipt-session","ipt-history","iit-session","iit-history","ipt-local-users"];
+  const APP_KEYS = ["ipt-session","ipt-history","iit-session","iit-history","iic-session","iic-history","iit-clin-part","ipt-local-users"];
 
   const esc = s => String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const read = ()=>{ try{ const s=JSON.parse(localStorage.getItem(K)); return s&&s.profile&&s.tk?s:null; }catch(e){ return null; } };
