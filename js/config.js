@@ -14,7 +14,8 @@ window.SITE = {
   apps: {
     pump: "/infusion-pump-trainer/",
     incubator: "/infant-incubator-trainer/",
-    "incubator-clin": "/infant-incubator-trainer/clinical/"
+    "incubator-clin": "/infant-incubator-trainer/clinical/",
+    "pump-clin": "/infusion-pump-trainer/clinical/"
   },
   contact: {
     email: "theptharo2019@gmail.com",
