@@ -59,4 +59,46 @@
     box.querySelector(".fb.good").hidden = !ok;
     box.querySelector(".fb.bad").hidden = ok;
   }));
+
+  /* ---------- หน้าแรก: แสดงวิชาที่ลงทะเบียนแล้ว (เฉพาะตอนล็อกอิน) ---------- */
+  const deck = document.querySelector(".devices");
+  if(page==="home" && sess && deck){
+    const en = sess.enrolled || [], apps = S.apps || {};
+    const idOf = a => { try{ return new URL(a.href).searchParams.get("c"); }catch(e){ return null; } };
+    const mine = [];
+    deck.querySelectorAll(".device").forEach(a=>{
+      const id = idOf(a); if(!id || !en.includes(id)) return;
+      mine.push(id);
+      a.classList.add("enrolled"); a.dataset.c = id;
+      if(apps[id]) a.href = apps[id];
+      const art = a.querySelector(".device-art"), b = art && art.querySelector(".badge");
+      if(b && !b.classList.contains("badge-clin")){ b.textContent = "✓ ลงทะเบียนแล้ว"; b.classList.add("badge-on"); }
+      else if(art) art.insertAdjacentHTML("beforeend", `<span class="badge badge-on badge-r">✓ ลงทะเบียนแล้ว</span>`);
+      const go = a.querySelector(".go");
+      if(go){
+        go.textContent = "เข้าเรียนต่อ →";
+        go.insertAdjacentHTML("beforebegin", `<div class="dprog"><div class="bar"><i style="width:0%"></i></div><span class="dprog-t muted small">กำลังโหลดความคืบหน้า…</span></div>`);
+      }
+    });
+    const first = esc(String(sess.profile.name||"").split(" ")[0]);
+    deck.insertAdjacentHTML("beforebegin", mine.length
+      ? `<div class="my-strip"><span>สวัสดี <b>${first}</b> · ลงทะเบียนแล้ว ${mine.length} วิชา</span><a href="my.html">ดูวิชาของฉัน →</a></div>`
+      : `<div class="my-strip"><span>สวัสดี <b>${first}</b> · ยังไม่ได้ลงทะเบียนวิชาใด เลือกวิชาด้านล่างเพื่อเริ่มเรียน</span></div>`);
+
+    if(mine.length) M.refresh().then(r=>{
+      if(!r.ok){
+        if(M.isAuthErr(r)){ location.reload(); return; }
+        deck.querySelectorAll(".dprog").forEach(d=>d.remove());
+        return;
+      }
+      const prog = r.progress || {};
+      deck.querySelectorAll(".device.enrolled").forEach(a=>{
+        const d = a.querySelector(".dprog"); if(!d) return;
+        const g = prog[a.dataset.c] || {}, pct = Math.max(0, Math.min(100, Number(g.pct)||0));
+        d.querySelector(".bar i").style.width = (g.pass ? 100 : pct) + "%";
+        d.classList.toggle("pass", !!g.pass);
+        d.querySelector(".dprog-t").textContent = g.pass ? "✓ ผ่านเกณฑ์แล้ว" : pct ? `ความคืบหน้า ${pct}%` : "ยังไม่เริ่มเรียน";
+      });
+    });
+  }
 })();

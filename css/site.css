@@ -273,3 +273,16 @@ img,svg{max-width:100%}
 .acct-box form{display:flex;flex-direction:column;gap:14px;padding:4px 0 20px}
 .acct-box .btn{align-self:flex-start}
 .device-art .badge-clin{background:#B5482B}
+
+/* หน้าแรก: วิชาที่ลงทะเบียนแล้ว */
+.my-strip{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;background:var(--mint);border:2px solid #1E8E3E;border-radius:18px;padding:12px 20px;margin:0 0 22px;font-size:16px}
+.my-strip a{font-weight:600;color:#1E6B34}
+.device.enrolled{border-color:#1E8E3E;box-shadow:0 0 0 3px #1E8E3E}
+.device.enrolled:hover{box-shadow:0 0 0 3px #1E8E3E,0 10px 0 var(--ink)}
+.device-art .badge-on{background:#1E8E3E}
+.device-art .badge-r{left:auto;right:16px}
+.device.enrolled .go{color:#1E6B34}
+.dprog{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.dprog .bar{height:10px}
+.dprog .bar i{background:#1E8E3E}
+.dprog.pass .dprog-t{color:#1E6B34;font-weight:600}
