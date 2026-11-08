@@ -75,7 +75,7 @@ img,svg{max-width:100%}
 .device-art{position:relative;height:190px;display:grid;place-items:center;padding:20px}
 .device-art svg{height:140px;width:auto}
 .device-art .badge{position:absolute;top:16px;left:16px;font-size:13px;font-weight:600;color:#fff;background:var(--accent);padding:4px 12px;border-radius:999px}
-.art-sky{background:var(--sky)} .art-peach{background:var(--peach)}
+.art-sky{background:var(--sky)} .art-peach{background:var(--peach)} .art-mint{background:#DDF3EA}
 .device-body{padding:22px 24px 24px;display:flex;flex-direction:column;gap:8px;flex:1}
 .device-body h3{margin:0;font-size:24px}
 .device-body .en{color:var(--muted);font-size:15px}
