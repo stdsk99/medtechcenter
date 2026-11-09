@@ -17,7 +17,8 @@ window.SITE = {
     "incubator-clin": "/infant-incubator-trainer/clinical/",
     "pump-clin": "/infusion-pump-trainer/clinical/",
     o2: "/oxygen-concentrator/",
-    "o2-clin": "/oxygen-concentrator/clinical/"
+    "o2-clin": "/oxygen-concentrator/clinical/",
+    suction: "/medical-suction/"
   },
   contact: {
     email: "theptharo2019@gmail.com",
