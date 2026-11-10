@@ -286,3 +286,5 @@ img,svg{max-width:100%}
 .dprog .bar{height:10px}
 .dprog .bar i{background:#1E8E3E}
 .dprog.pass .dprog-t{color:#1E6B34;font-weight:600}
+.cert-dl{display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-top:10px}
+.cert-dl .msg{margin:0;width:100%}

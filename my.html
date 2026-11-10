@@ -49,6 +49,16 @@
       ${others.length ? `<h2 class="h-sec">วิชาอื่นที่เปิดให้เรียน</h2>
         <div class="my-grid">${others.map(c=>`<a class="mini-course" href="course.html?c=${c.id}"><span class="mini-art art-${c.art}">${window.COURSE_ART[c.id]||""}</span><span><b>${esc(c.th)}</b><small>${esc(c.en)}</small><span class="go">ดูรายละเอียดและลงทะเบียน →</span></span></a>`).join("")}</div>` : ""}`;
     document.getElementById("out").onclick = ()=>{ M.logout(); location.href = "./"; };
+    root.querySelectorAll("[data-cert]").forEach(b=>b.onclick = async ()=>{
+      const m = b.parentNode.querySelector(".msg"), label = b.textContent;
+      b.disabled = true; b.textContent = "กำลังออกเกียรติบัตร…"; m.hidden = true;
+      const r = await M.cert(b.dataset.cert);
+      b.disabled = false; b.textContent = label;
+      if(!r.ok){ if(M.isAuthErr(r)){ location.replace("login.html?next=my.html"); return; } m.className = "msg bad"; m.textContent = M.errText(r); m.hidden = false; return; }
+      const url = M.savePdf(r.b64, r.file || "Certificate.pdf");
+      m.className = "msg ok"; m.hidden = false;
+      m.innerHTML = `ได้รับเกียรติบัตร เลขที่ <b>${esc(r.ref)}</b> แล้ว ถ้าไฟล์ไม่ดาวน์โหลดเอง <a href="${url}" download="${esc(r.file||"Certificate.pdf")}" target="_blank" rel="noopener">กดที่นี่เพื่อเปิด PDF</a>`;
+    });
   }
 
   function card(c, g, certs, loading){
@@ -63,8 +73,9 @@
         <div><h3>${esc(c.th)}</h3><small class="muted">${esc(c.en)}</small></div>${status}</div>
       <div class="bar" role="progressbar" aria-label="ความคืบหน้า ${esc(c.th)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${g.pct}"><i style="width:${g.pct}%"></i></div>
       <ul class="crit-rows">${rows.map(row).join("")}</ul>
-      ${certs.length ? `<div class="cert-row">${certs.map(x=>`<div><b>เกียรติบัตร เลขที่ ${esc(x.ref)}</b><small class="muted">ออกเมื่อ ${thDate(x.date)}</small></div>`).join("")}</div>`
-        : g.pass ? `<p class="muted small">ผ่านเกณฑ์แล้ว ดาวน์โหลดใบรับรองได้ในแอป (เมนู "ผลของฉัน") ส่วนเกียรติบัตรทางการ ผู้ดูแลระบบจะออกให้และแสดงที่นี่</p>` : ""}
+      ${certs.length ? `<div class="cert-row">${certs.map(x=>`<div><b>เกียรติบัตร เลขที่ ${esc(x.ref)}</b><small class="muted">ออกเมื่อ ${thDate(x.date)}</small></div>`).join("")}</div>` : ""}
+      ${certs.length || g.pass ? `<div class="cert-dl"><button class="btn btn-outline btn-sm" type="button" data-cert="${c.id}">ดาวน์โหลดเกียรติบัตร (PDF)</button>
+        ${certs.length ? "" : `<small class="muted">ผ่านเกณฑ์แล้ว กดเพื่อรับเกียรติบัตร ครั้งแรกอาจใช้เวลา 10–30 วินาที</small>`}<div class="msg" role="status" hidden></div></div>` : ""}
       <div class="prog-actions"><a class="btn btn-primary btn-sm" href="${esc(url)}">${g.pct?"เรียนต่อ →":"เริ่มเรียน →"}</a>
         <a class="btn btn-ghost btn-sm" href="course.html?c=${c.id}">รายละเอียดวิชา</a></div>
     </article>`;

@@ -26,9 +26,9 @@
   const pwValid = p => /^[\x21-\x7E]{8,16}$/.test(p) && PW_RULES.every(r=>r.f(p));
   const pwBadChar = p => p && !/^[\x21-\x7E]*$/.test(p);
 
-  async function call(action, payload){
+  async function call(action, payload, ms){
     if(!S.apiUrl) return {ok:false, err:"offline"};
-    const ctl = new AbortController(), tm = setTimeout(()=>ctl.abort(), 25000);
+    const ctl = new AbortController(), tm = setTimeout(()=>ctl.abort(), ms || 25000);
     try{
       const r = await fetch(S.apiUrl, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"},
         body: JSON.stringify(Object.assign({action, token:S.token}, payload)), signal:ctl.signal});
@@ -41,7 +41,9 @@
     suspended:"บัญชีนี้ถูกระงับการใช้งาน กรุณาติดต่อผู้ดูแลระบบ", auth:"การเข้าสู่ระบบหมดอายุ กรุณาเข้าสู่ระบบใหม่",
     notenrolled:"ยังไม่ได้ลงทะเบียนวิชานี้",
     net:"เชื่อมต่อระบบไม่ได้ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่", token:"ระบบตั้งค่าไม่ถูกต้อง กรุณาแจ้งผู้ดูแลระบบ",
-    offline:"ยังไม่ได้ตั้งค่าการเชื่อมต่อระบบ", bad:"คำขอไม่ถูกต้อง", notfound:"ไม่พบเลขที่นี้ในระบบ", format:"รูปแบบเลขที่ไม่ถูกต้อง"};
+    offline:"ยังไม่ได้ตั้งค่าการเชื่อมต่อระบบ",
+    notpass:"ระบบยังไม่พบว่าผ่านเกณฑ์ครบ ลองใหม่อีกครั้งภายหลัง", notmpl:"ยังออกเกียรติบัตรวิชานี้ไม่ได้ เพราะผู้สอนยังไม่ได้เตรียมแม่แบบ กรุณาแจ้งผู้สอน",
+    nofile:"ไม่พบไฟล์เกียรติบัตรในระบบ กรุณาแจ้งผู้สอน", bad:"คำขอไม่ถูกต้อง", notfound:"ไม่พบเลขที่นี้ในระบบ", format:"รูปแบบเลขที่ไม่ถูกต้อง"};
   function errText(r){
     if(r && r.err==="locked") return `ใส่รหัสผ่านผิดหลายครั้ง บัญชีถูกล็อกชั่วคราว กรุณาลองใหม่ในอีก ${r.mins||15} นาที หรือติดต่อผู้ดูแลระบบ`;
     if(r && r.err==="badpw" && r.left && r.left<=2) return `รหัสผ่านไม่ถูกต้อง (ใส่ผิดได้อีก ${r.left} ครั้งก่อนบัญชีถูกล็อก 15 นาที)`;
@@ -78,6 +80,20 @@
     return r;
   }
   const verify = ref => call("verify", {ref});
+  /* ขอเกียรติบัตรทางการ (PDF) ของวิชา app: ออกใหม่ถ้ายังไม่เคยออก หรือได้ฉบับเดิม (ครั้งแรกใช้เวลาหลายวินาที) */
+  async function cert(app){
+    const s = read(); if(!s) return {ok:false, err:"auth"};
+    const r = await call("cert", {tk:s.tk, app}, 90000);
+    if(!r.ok && isAuthErr(r)) logout();
+    return r;
+  }
+  /* บันทึก PDF จาก base64 ลงเครื่อง คืน URL ของไฟล์ (ใช้เป็นลิงก์สำรอง) */
+  function savePdf(b64, file){
+    const bin = atob(b64), u8 = new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) u8[i] = bin.charCodeAt(i);
+    const url = URL.createObjectURL(new Blob([u8], {type:"application/pdf"}));
+    const a = document.createElement("a"); a.href = url; a.download = file; document.body.appendChild(a); a.click(); a.remove();
+    return url;
+  }
   function logout(){ try{ localStorage.removeItem(K); APP_KEYS.forEach(k=>localStorage.removeItem(k)); }catch(e){} }
 
   /* ไปหน้าที่ต้องการหลังล็อกอิน (เฉพาะหน้าในเว็บนี้) */
@@ -111,6 +127,6 @@
     return "";
   }
 
-  window.MTC = {session:read, login, register, changeWithOld, changePassword, refresh, enroll, verify, logout,
+  window.MTC = {session:read, login, register, changeWithOld, changePassword, refresh, enroll, verify, cert, savePdf, logout,
     errText, isAuthErr, esc, nextUrl, norm, pwCheck, pwValid, pwProblem, pwField, bindPw};
 })();
