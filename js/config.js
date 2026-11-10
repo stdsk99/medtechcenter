@@ -21,7 +21,7 @@ window.SITE = {
     suction: "/medical-suction/",
     "suction-clin": "/medical-suction/clinical/",
     warmer: "/infant-warmer/",
-    photo: "/infant-warmer/phototherapy/"
+    photo: "/phototherapy/"
   },
   contact: {
     email: "theptharo2019@gmail.com",
