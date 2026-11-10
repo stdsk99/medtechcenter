@@ -20,6 +20,7 @@
 | `stdsk99/infusion-pump-trainer` | วิชาซ่อมปั๊ม `/` · วิชาคลินิกปั๊ม `/clinical/` · 3D `/3d/` | `pump` · `pump-clin` |
 | `stdsk99/infant-incubator-trainer` | วิชาซ่อมตู้อบ `/` · วิชาคลินิกตู้อบ `/clinical/` · 3D `/3d/` | `incubator` · `incubator-clin` |
 | `stdsk99/oxygen-concentrator` | วิชาซ่อมเครื่องผลิตออกซิเจน `/` · วิชาคลินิก `/clinical/` | `o2` · `o2-clin` |
+| `stdsk99/infant-warmer` | วิชาซ่อมเครื่องอุ่นทารกแบบแผ่รังสี `/` · 3D `/3d/` (เครื่องส่องไฟ `/phototherapy/` และวิชาคลินิก `/clinical/` จะตามมา) | `warmer` |
 | `stdsk99/medical-suction` | วิชาซ่อมเครื่องดูดทางการแพทย์ `/` · 3D `/3d/` · วิชาคลินิก `/clinical/` | `suction` · `suction-clin` |
 
 ## ⚠️ Code.gs: ไฟล์เดียวใช้ร่วมทุกวิชา
@@ -65,6 +66,7 @@
 ## งานค้าง / เรื่องที่ควรรู้
 
 - ปิดโหมด `?preview` และให้หน้า 3D ตรวจการลงทะเบียน: เจ้าของงานให้รอไว้ก่อน ทำเมื่อจะเปิดรับผู้เรียนจริง
+- วิชาเครื่องอุ่นทารก (`warmer`, store `iwt`, เลขที่ `IWT-`): วิชาช่าง 8 โมดูล + หน้า 3D โครงเดียวกับวิชาเครื่องดูด ภาพเครื่องคือ `js/dia.js` (WMDIA)
 - วิชาเครื่องดูด (`suction`): วิชาช่าง 8 โมดูล + หน้า 3D
 - วิชาคลินิกเครื่องดูด (`suction-clin`, store `suc`, เลขที่ `SUC-`): 9 บท + เครื่องจำลอง 7 สถานการณ์ (ใช้ภาพตัดเครื่อง `../js/dia.js` ร่วมกับวิชาช่าง) เนื้อหาอ้างอิง AARC 2004/2010/2022, Open RN, StatPearls และคู่มือผู้ใช้ DeVilbiss/Medline เป็นฉบับทดลอง ยังไม่ผ่านการตรวจทานโดยพยาบาล
   เอกสารอ้างอิงที่เจ้าของงานให้: Medline Vac-Assist HCS7000 · DeVilbiss Vacu-Aide QSU 7314 · Aeros Instavac (service) · Weinmann Accuvac Rescue (service ห้ามทำซ้ำ ใช้เป็นความรู้เท่านั้น)
