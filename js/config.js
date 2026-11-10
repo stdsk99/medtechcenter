@@ -18,7 +18,8 @@ window.SITE = {
     "pump-clin": "/infusion-pump-trainer/clinical/",
     o2: "/oxygen-concentrator/",
     "o2-clin": "/oxygen-concentrator/clinical/",
-    suction: "/medical-suction/"
+    suction: "/medical-suction/",
+    "suction-clin": "/medical-suction/clinical/"
   },
   contact: {
     email: "theptharo2019@gmail.com",
