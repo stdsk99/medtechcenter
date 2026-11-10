@@ -20,7 +20,8 @@ window.SITE = {
     "o2-clin": "/oxygen-concentrator/clinical/",
     suction: "/medical-suction/",
     "suction-clin": "/medical-suction/clinical/",
-    warmer: "/infant-warmer/"
+    warmer: "/infant-warmer/",
+    photo: "/infant-warmer/phototherapy/"
   },
   contact: {
     email: "theptharo2019@gmail.com",
