@@ -7,7 +7,7 @@
   const K = "mtc-session";
   /* คีย์ของแอปฝึกซ่อม ลบพร้อมกันตอนออกจากระบบ */
   const APP_KEYS = ["ipt-session","ipt-history","iit-session","iit-history","iic-session","iic-history","iit-clin-part","ipt-local-users","ipc-session","ipc-history",
-    "oct-session","oct-history","occ-session","occ-history","sut-session","sut-history","sut-clin-part","sut-svc-part","suc-session","suc-history","iwt-session","iwt-history","iwt-clin-part","iwt-svc-part","pht-session","pht-history","pht-clin-part","pht-svc-part"];
+    "oct-session","oct-history","occ-session","occ-history","sut-session","sut-history","sut-clin-part","sut-svc-part","suc-session","suc-history","iwt-session","iwt-history","iwt-clin-part","iwt-svc-part","pht-session","pht-history","pht-clin-part","pht-svc-part","iwc-session","iwc-history"];
 
   const esc = s => String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const read = ()=>{ try{ const s=JSON.parse(localStorage.getItem(K)); return s&&s.profile&&s.tk?s:null; }catch(e){ return null; } };
