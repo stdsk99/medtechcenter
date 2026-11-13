@@ -6,8 +6,12 @@
   const S = window.SITE || {};
   const K = "mtc-session";
   /* คีย์ของแอปฝึกซ่อม ลบพร้อมกันตอนออกจากระบบ */
-  const APP_KEYS = ["ipt-session","ipt-history","iit-session","iit-history","iic-session","iic-history","iit-clin-part","ipt-local-users","ipc-session","ipc-history",
-    "oct-session","oct-history","occ-session","occ-history","sut-session","sut-history","sut-clin-part","sut-svc-part","suc-session","suc-history","iwt-session","iwt-history","iwt-clin-part","iwt-svc-part","pht-session","pht-history","pht-clin-part","pht-svc-part","iwc-session","iwc-history"];
+  /* คีย์ localStorage ของทุกวิชา ล้างตอนออกจากระบบ
+     เพิ่มวิชาใหม่: ใส่ store ของวิชา (จาก data/config.js ของแอป) ลงใน STORES */
+  const STORES = ["ipt","ipc","iit","iic","oct","occ","sut","suc","iwt","iwc","pht"];
+  const SUFFIXES = ["session","history","preview-history","seen","clin-part","svc-part"];
+  const APP_KEYS = STORES.flatMap(s=>SUFFIXES.map(x=>s+"-"+x))
+    .concat(["ipt-local-users","app-seen","app-svc-part","app-session","app-history","app-preview-history"]);   // app-* = คีย์เก่าก่อนวิชาปั๊ม/ตู้อบมี store
 
   const esc = s => String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const read = ()=>{ try{ const s=JSON.parse(localStorage.getItem(K)); return s&&s.profile&&s.tk?s:null; }catch(e){ return null; } };
